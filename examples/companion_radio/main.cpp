@@ -13,6 +13,24 @@ static uint32_t _atoi(const char *sp) {
   return n;
 }
 
+/////////////////////////////////////////////////Added by Asanka for BLE on/off button
+///////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if defined(NRF52_PLATFORM) && defined(BLE_PIN_CODE)
+
+#define BLE_BUTTON_PIN         WB_IO1
+#define BLE_BUTTON_DEBOUNCE_MS 50
+
+bool ble_button_last_reading = HIGH;
+bool ble_button_stable_state = HIGH;
+unsigned long ble_button_last_change = 0;
+
+#endif
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #if defined(NRF52_PLATFORM) || defined(STM32_PLATFORM)
 #include <InternalFileSystem.h>
 #if defined(QSPIFLASH)
@@ -246,25 +264,74 @@ void setup() {
                 the_mesh.getNodePrefs()); // still want to pass this in as dependency, as prefs might be moved
 #endif
 
+  ///// Added by Asanka for BLE on/off button /////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  // #if defined(NRF52_PLATFORM) && defined(BLE_PIN_CODE)
+  //   pinMode(BLE_BUTTON_PIN, INPUT_PULLUP);
+  // #endif
+
+  //   #ifdef BLE_PIN_CODE
+  //     serial_interface.disable();
+  //     Serial.println("BLE OFF - press button to enable");
+  //     Serial.flush();
+  //   #endif
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   board.onBootComplete();
 }
 
 void loop() {
   the_mesh.loop();
-  // sensors.loop();
+  sensors.loop();
 #ifdef DISPLAY_CLASS
   ui_task.loop();
 #endif
   rtc_clock.tick();
 
+  //// Added by Asanka for BLE on/off button /////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  // #if defined(NRF52_PLATFORM) && defined(BLE_PIN_CODE)
+
+  //   bool reading = digitalRead(BLE_BUTTON_PIN);
+
+  //   if (reading != ble_button_last_reading) {
+  //     ble_button_last_change = millis();
+  //     ble_button_last_reading = reading;
+  //   }
+
+  //   if ((millis() - ble_button_last_change) >= BLE_BUTTON_DEBOUNCE_MS) {
+  //     if (reading != ble_button_stable_state) {
+  //       ble_button_stable_state = reading;
+
+  //       // Toggle BLE only when the button is pressed
+  //       if (ble_button_stable_state == LOW) {
+  //         if (serial_interface.isEnabled()) {
+  //           serial_interface.disable();
+  //           Serial.println("BLE OFF");
+  //         } else {
+  //           serial_interface.enable();
+  //           Serial.println("BLE ON");
+  //         }
+  //       }
+  //     }
+  //   }
+
+  // #endif
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   if (!the_mesh.hasPendingWork()) {
 #if defined(NRF52_PLATFORM)
-    Serial.println("POWER: No pending work -> entering sleep");
-    Serial.flush();
+    // Serial.println("POWER: No pending work -> entering sleep");
+    // Serial.flush();
 
     board.sleep(0);
 
-    Serial.println("POWER: WOKE UP from sleep");
+    // Serial.println("POWER: WOKE UP from sleep");
 #endif
   }
 
